@@ -1,53 +1,58 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
+import TypingArea from "./components/TypingArea";
+import {stanzaOrder} from "./Helper.js";
 
 function App() {
-  const [items, setItems] = useState([]);
-  const [input, setInput] = useState("");
+  const [stanza, setStanza] = useState([]); // The current stanza
+  const [input, setInput] = useState(""); // The most recent keyboard input
+  const [wordInput, setWordInput] = useState(""); // The current word the user is typing
+  const [currentStanza, setCurrentStanza] = useState(0); // Index of the current stanza index in stanzaOrder
 
-  // Read in JSON data
+  // Read in a random stanza whenever the currentStanza changes
   useEffect(() => {
     fetch("/type-test/data.json")
       .then((response) => response.json())
-      .then((jsonData) => setItems(jsonData.items));
-  }, []);
+      .then((jsonData) => setStanza(jsonData.items[stanzaOrder[currentStanza]]));
+  }, [currentStanza]);
 
-  // Handle user keyboard input
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Backspace") {
-        setInput((prevInput) => prevInput.slice(0, -1));
-      } else if (event.key.length === 1) {
-        setInput((prevInput) => prevInput + event.key);
+  const handleKeyDown = (event) => { // update the wordInput state
+    setInput(event.key);
+    if (event.key === "Backspace" && wordInput.length > 0) { // handle backspace
+      setWordInput((prevWordInput) => prevWordInput.slice(0, -1));
+    } else if (event.key === "Enter" || event.key === " ") { // handle space or enter
+      if (wordInput.length > 0) {
+        console.log("nextword");
+        setWordInput(""); // Goto the next word
       }
-    };
+    } else if (event.key.length === 1) {
+      setWordInput((prevWordInput) => prevWordInput + event.key);
+    }
+  };
+  // Set up event listener for keyboard input
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [wordInput]);
+
+  // useEffect(() => {
+  //   console.log(wordInput);
+  // }, [wordInput]);
+
+  // function for testing incrementstanza button
+  // need to replace this with incrementing whenever the stanza is complete
+  function incrementStanza() {
+    setCurrentStanza((currentStanza + 1) % stanzaOrder.length);
+  }
 
   return (
     <div className="App">
-      <p>
-        {items.map((line, index) => {
-          return (
-            <span key={index}>
-              {line.map((word, wIndex) => {
-                return (
-                  <span key={wIndex}> {word.split('').map((letter, lIndex) => {
-                    return (
-                      <span key={lIndex}>{letter}</span>
-                    )
-                  })} </span>
-                );
-              })}
-              <br />
-            </span>
-          );
-        })}
-      </p>
+      <button onClick={incrementStanza}>new stanza</button>
+      <TypingArea stanza={stanza} />
       <p>{input}</p>
+      <p>{wordInput}</p>
     </div>
   );
 }
