@@ -5,12 +5,14 @@ function App() {
   const [items, setItems] = useState([]);
   const [input, setInput] = useState("");
 
+  // Read in JSON data
   useEffect(() => {
     fetch("/type-test/data.json")
       .then((response) => response.json())
       .then((jsonData) => setItems(jsonData.items));
   }, []);
 
+  // Handle user keyboard input
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Backspace") {
@@ -27,15 +29,25 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>List of items:</h1>
-        <ul>
-          {items.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
-        <p>{input}</p>
-      </header>
+      <p>
+        {items.map((line, index) => {
+          return (
+            <span key={index}>
+              {line.map((word, wIndex) => {
+                return (
+                  <span key={wIndex}> {word.split('').map((letter, lIndex) => {
+                    return (
+                      <span key="lIndex">{letter}</span>
+                    )
+                  })} </span>
+                );
+              })}
+              <br />
+            </span>
+          );
+        })}
+      </p>
+      <p>{input}</p>
     </div>
   );
 }

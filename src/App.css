@@ -1,5 +1,4 @@
 .App {
-  text-align: center;
   background-color: #2C3333;
   min-height: 100vh;
   display: flex;
@@ -9,4 +8,8 @@
   font-size: calc(10px + 2vmin);
   color: #5f6e6b;
   font-family: monospace;
+}
+
+span {
+  text-align: left;
 }
