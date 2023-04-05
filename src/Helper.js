@@ -1,10 +1,10 @@
-const getStanzaOrder = function(numberOfStanzas) {
-    const array = [];
-    for (let i = 0; i < numberOfStanzas; i++) {
-        array.push(i);
-      }
+function getStanzaOrder(numberOfStanzas) {
+  const array = [];
+  for (let i = 0; i < numberOfStanzas; i++) {
+    array.push(i);
+  }
 
-    return shuffle(array);
+  return shuffle(array);
 }
 // Shuffle Algorithm found at:
 // stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array

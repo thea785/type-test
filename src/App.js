@@ -9,6 +9,8 @@ function App() {
   const [wordInput, setWordInput] = useState(""); // The current word the user is typing
   const [currentWordIndex, setCurrentWordIndex] = useState(0); // The index of the current word to be typed
   const [currentStanza, setCurrentStanza] = useState(0); // Index of the current stanza index in stanzaOrder
+  const [stanzaIndex, setStanzaIndex] = useState([0, 0]); // Index of current word in stanza form
+  const [displayStanza, setDisplayStanza] = useState(); // Starts empty, fills up with user input
 
   // Read in a random stanza whenever the currentStanza changes
   useEffect(() => {
@@ -17,6 +19,13 @@ function App() {
       .then((jsonData) =>
         setStanza(jsonData.items[stanzaOrder[currentStanza]])
       );
+      // Set up displayStanza
+      let array = [[],[],[]];
+      for (let i = 0; i < stanza.length; i++) {
+        for (let j = 0; j < stanza[i].length; j++) {
+          array.push("");
+        }
+      }
   }, [currentStanza]);
 
   // Function used by event listener for handling keyboard input
@@ -50,6 +59,16 @@ function App() {
       setCurrentStanza((currentStanza + 1) % stanzaOrder.length);
       setCurrentWordIndex(0);
     }
+    // Set the stanzaIndex (used for indexing to the stanza in TypingArea) 
+    if (stanza.length != 0) {
+      if (currentWordIndex < stanza[0].length) {
+        setStanzaIndex([0,currentWordIndex]);
+      } else if (currentWordIndex < stanza[0].length + stanza[1].length) {
+        setStanzaIndex([1,currentWordIndex - stanza[0].length]);
+      } else {
+        setStanzaIndex([2,currentWordIndex - stanza[0].length - stanza[1].length]);
+      }
+    }
   }, [currentWordIndex]);
 
   // function for testing incrementstanza button
@@ -60,14 +79,14 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={incrementStanza}>new stanza</button>
       <TypingArea
         stanza={stanza}
         currentWordIndex={currentWordIndex}
         wordInput={wordInput}
+        stanzaIndex={stanzaIndex}
       />
-      <p>{input}</p>
-      <p>{wordInput}</p>
+      <p>{input.length > 0 ? input : "⠀"}</p>
+      <p>{wordInput.length > 0 ? wordInput : "⠀"}</p>
       <p>{stanza.flat()[currentWordIndex]}</p>
     </div>
   );
