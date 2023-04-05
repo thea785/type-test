@@ -10,7 +10,10 @@ function App() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0); // The index of the current word to be typed
   const [currentStanza, setCurrentStanza] = useState(0); // Index of the current stanza index in stanzaOrder
   const [stanzaIndex, setStanzaIndex] = useState([0, 0]); // Index of current word in stanza form
-  const [displayStanza, setDisplayStanza] = useState(); // Starts empty, fills up with user input
+  const [displayStanza, setDisplayStanza] = useState([]); // Starts empty, fills up with user input
+  const [combinedStanza, setCombinedStanza] = useState([]); // Combination of both displayStanza and stanza
+  
+
 
   // Read in a random stanza whenever the currentStanza changes
   useEffect(() => {
@@ -19,14 +22,23 @@ function App() {
       .then((jsonData) =>
         setStanza(jsonData.items[stanzaOrder[currentStanza]])
       );
-      // Set up displayStanza
-      let array = [[],[],[]];
-      for (let i = 0; i < stanza.length; i++) {
-        for (let j = 0; j < stanza[i].length; j++) {
-          array.push("");
-        }
-      }
   }, [currentStanza]);
+
+  // Set up displayStanza and combinedStanza
+  useEffect(() => {
+    let displayArray = [];
+    let combinedArray = [];
+    for (let i = 0; i < stanza.length; i++) {
+      displayArray[i] = [];
+      combinedArray[i] = [];
+      for (let j = 0; j < stanza[i].length; j++) {
+        displayArray[i][j] = "";
+        combinedArray[i][j] = stanza[i][j].slice();
+      }
+    }
+    setDisplayStanza(displayArray);
+    setCombinedStanza(combinedArray);
+  }, [stanza]);
 
   // Function used by event listener for handling keyboard input
   const handleKeyDown = (event) => {
@@ -52,6 +64,27 @@ function App() {
     };
   }, [wordInput]);
 
+  // Update displayStanza and combinedStanza when the wordInput changes
+  useEffect(() => {
+    if (displayStanza.length > 0) { // <-- check if the stanza values are ready
+
+      // Check for too long word input
+      if (wordInput.length > stanza[stanzaIndex[0]][stanzaIndex[1]].length) {
+        setWordInput((prevWordInput) => prevWordInput.slice(0, -1));
+      }
+
+      if (wordInput !== ""){
+        let copy = [...displayStanza];
+        copy[stanzaIndex[0]][stanzaIndex[1]] = wordInput;
+        setDisplayStanza(copy);
+      }
+      
+      let combinedCopy = [...combinedStanza];
+      combinedCopy[stanzaIndex[0]][stanzaIndex[1]] = wordInput + stanza[stanzaIndex[0]][stanzaIndex[1]].slice(wordInput.length);
+      setCombinedStanza(combinedCopy);
+    }
+  }, [wordInput]);
+
   // Handles when the currentWordIndex is updated
   useEffect(() => {
     if (currentWordIndex >= stanza.flat().length) {
@@ -59,32 +92,31 @@ function App() {
       setCurrentStanza((currentStanza + 1) % stanzaOrder.length);
       setCurrentWordIndex(0);
     }
-    // Set the stanzaIndex (used for indexing to the stanza in TypingArea) 
-    if (stanza.length != 0) {
+    // Set the stanzaIndex (used for indexing to the stanza in TypingArea)
+    if (stanza.length !== 0) {
       if (currentWordIndex < stanza[0].length) {
-        setStanzaIndex([0,currentWordIndex]);
+        setStanzaIndex([0, currentWordIndex]);
       } else if (currentWordIndex < stanza[0].length + stanza[1].length) {
-        setStanzaIndex([1,currentWordIndex - stanza[0].length]);
+        setStanzaIndex([1, currentWordIndex - stanza[0].length]);
       } else {
-        setStanzaIndex([2,currentWordIndex - stanza[0].length - stanza[1].length]);
+        setStanzaIndex([
+          2,
+          currentWordIndex - stanza[0].length - stanza[1].length,
+        ]);
       }
     }
   }, [currentWordIndex]);
-
-  // function for testing incrementstanza button
-  // need to replace this with incrementing whenever the stanza is complete
-  function incrementStanza() {
-    setCurrentStanza((currentStanza + 1) % stanzaOrder.length);
-  }
 
   return (
     <div className="App">
       <TypingArea
         stanza={stanza}
-        currentWordIndex={currentWordIndex}
+        displayStanza={displayStanza}
         wordInput={wordInput}
         stanzaIndex={stanzaIndex}
+        combinedStanza={combinedStanza}
       />
+      <p></p>
       <p>{input.length > 0 ? input : "⠀"}</p>
       <p>{wordInput.length > 0 ? wordInput : "⠀"}</p>
       <p>{stanza.flat()[currentWordIndex]}</p>
