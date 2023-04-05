@@ -37,7 +37,7 @@ function App() {
                 return (
                   <span key={wIndex}> {word.split('').map((letter, lIndex) => {
                     return (
-                      <span key="lIndex">{letter}</span>
+                      <span key={lIndex}>{letter}</span>
                     )
                   })} </span>
                 );
