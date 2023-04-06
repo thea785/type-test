@@ -29,4 +29,4 @@ function shuffle(array) {
 }
 
 // Update the parameter as json data grows
-export const stanzaOrder = getStanzaOrder(3);
+export const stanzaOrder = getStanzaOrder(10);
