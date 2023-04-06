@@ -5,7 +5,6 @@ import { stanzaOrder } from "./Helper.js";
 
 function App() {
   const [stanza, setStanza] = useState([]); // The current stanza
-  const [input, setInput] = useState(""); // The most recent keyboard input
   const [wordInput, setWordInput] = useState(""); // The current word the user is typing
   const [currentWordIndex, setCurrentWordIndex] = useState(0); // The index of the current word to be typed
   const [currentStanza, setCurrentStanza] = useState(0); // Index of the current stanza index in stanzaOrder
@@ -45,7 +44,6 @@ function App() {
 
   // Function used by event listener for handling keyboard input
   const handleKeyDown = (event) => {
-    setInput(event.key);
     if (event.key === "Backspace" && wordInput.length > 0) {
       // handle backspace
       setWordInput((prevWordInput) => prevWordInput.slice(0, -1));
@@ -77,20 +75,18 @@ function App() {
         setWordInput((prevWordInput) => prevWordInput.slice(0, -1));
       }
 
-      if (wordInput !== "") {
+      let letterCopy = [...letterState];
+      if (wordInput.length > 0) {
         let copy = [...displayStanza];
         copy[stanzaIndex[0]][stanzaIndex[1]] = wordInput;
         setDisplayStanza(copy);
-      }
 
-      let combinedCopy = [...combinedStanza];
-      combinedCopy[stanzaIndex[0]][stanzaIndex[1]] =
-        wordInput +
-        stanza[stanzaIndex[0]][stanzaIndex[1]].slice(wordInput.length);
-      setCombinedStanza(combinedCopy);
+        let combinedCopy = [...combinedStanza];
+        combinedCopy[stanzaIndex[0]][stanzaIndex[1]] =
+          wordInput +
+          stanza[stanzaIndex[0]][stanzaIndex[1]].slice(wordInput.length);
+        setCombinedStanza(combinedCopy);
 
-      let letterCopy = [...letterState];
-      if (wordInput.length > 0) {
         for (
           let i = 0;
           i < combinedStanza[stanzaIndex[0]][stanzaIndex[1]].length;
