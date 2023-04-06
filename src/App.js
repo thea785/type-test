@@ -132,6 +132,7 @@ function App() {
 
   return (
     <div className="App">
+      <a href="https://github.com/thea785/type-test">Source Code</a>
       <TypingArea
         wordInput={wordInput}
         stanzaIndex={stanzaIndex}
