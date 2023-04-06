@@ -12,8 +12,7 @@ function App() {
   const [stanzaIndex, setStanzaIndex] = useState([0, 0]); // Index of current word in stanza form
   const [displayStanza, setDisplayStanza] = useState([]); // Starts empty, fills up with user input
   const [combinedStanza, setCombinedStanza] = useState([]); // Combination of both displayStanza and stanza
-  
-
+  const [letterState, setLetterState] = useState([]); // 0 is untyped, 1 is typed, 2 is incorrectly typed
 
   // Read in a random stanza whenever the currentStanza changes
   useEffect(() => {
@@ -24,20 +23,24 @@ function App() {
       );
   }, [currentStanza]);
 
-  // Set up displayStanza and combinedStanza
+  // Set up states displayStanza, combinedStanza, and letterState
   useEffect(() => {
     let displayArray = [];
     let combinedArray = [];
+    let letterArray = [];
     for (let i = 0; i < stanza.length; i++) {
       displayArray[i] = [];
       combinedArray[i] = [];
+      letterArray[i] = [];
       for (let j = 0; j < stanza[i].length; j++) {
         displayArray[i][j] = "";
         combinedArray[i][j] = stanza[i][j].slice();
+        letterArray[i][j] = Array(stanza[i][j].length).fill(0);
       }
     }
     setDisplayStanza(displayArray);
     setCombinedStanza(combinedArray);
+    setLetterState(letterArray);
   }, [stanza]);
 
   // Function used by event listener for handling keyboard input
@@ -64,24 +67,48 @@ function App() {
     };
   }, [wordInput]);
 
-  // Update displayStanza and combinedStanza when the wordInput changes
+  // Update states when the wordInput changes
   useEffect(() => {
-    if (displayStanza.length > 0) { // <-- check if the stanza values are ready
+    if (displayStanza.length > 0) {
+      // <-- check if the stanza values are ready
 
       // Check for too long word input
       if (wordInput.length > stanza[stanzaIndex[0]][stanzaIndex[1]].length) {
         setWordInput((prevWordInput) => prevWordInput.slice(0, -1));
       }
 
-      if (wordInput !== ""){
+      if (wordInput !== "") {
         let copy = [...displayStanza];
         copy[stanzaIndex[0]][stanzaIndex[1]] = wordInput;
         setDisplayStanza(copy);
       }
-      
+
       let combinedCopy = [...combinedStanza];
-      combinedCopy[stanzaIndex[0]][stanzaIndex[1]] = wordInput + stanza[stanzaIndex[0]][stanzaIndex[1]].slice(wordInput.length);
+      combinedCopy[stanzaIndex[0]][stanzaIndex[1]] =
+        wordInput +
+        stanza[stanzaIndex[0]][stanzaIndex[1]].slice(wordInput.length);
       setCombinedStanza(combinedCopy);
+
+      let letterCopy = [...letterState];
+      if (wordInput.length > 0) {
+        for (
+          let i = 0;
+          i < combinedStanza[stanzaIndex[0]][stanzaIndex[1]].length;
+          i++
+        ) {
+          if (i >= wordInput.length) {
+            letterCopy[stanzaIndex[0]][stanzaIndex[1]][i] = 0; // Not typed yet
+          } else if (
+            stanza[stanzaIndex[0]][stanzaIndex[1]][i] === wordInput[i]
+          ) {
+            letterCopy[stanzaIndex[0]][stanzaIndex[1]][i] = 1; // Matching letter
+          } else {
+            letterCopy[stanzaIndex[0]][stanzaIndex[1]][i] = 2; // Non-matching letter
+          }
+        }
+      }
+
+      console.log(letterState);
     }
   }, [wordInput]);
 
@@ -110,16 +137,11 @@ function App() {
   return (
     <div className="App">
       <TypingArea
-        stanza={stanza}
-        displayStanza={displayStanza}
         wordInput={wordInput}
         stanzaIndex={stanzaIndex}
         combinedStanza={combinedStanza}
+        letterState={letterState}
       />
-      <p></p>
-      <p>{input.length > 0 ? input : "⠀"}</p>
-      <p>{wordInput.length > 0 ? wordInput : "⠀"}</p>
-      <p>{stanza.flat()[currentWordIndex]}</p>
     </div>
   );
 }
